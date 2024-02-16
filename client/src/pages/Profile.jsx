@@ -12,7 +12,12 @@ import {
   updateUserStart,
   updateUserSuccess,
   updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
+  signOut,
 } from "../redux/user/userSlice";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -23,6 +28,7 @@ const Profile = () => {
   const [formData, setFormData] = useState({});
   const dispatch = useDispatch();
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (image) {
@@ -75,6 +81,34 @@ const Profile = () => {
       setUpdateSuccess(true);
     } catch (error) {
       dispatch(updateUserFailure(error));
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`api/user/delete/${currentUser._id}`, {
+        method: "delete",
+      });
+      const data = res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+      navigate("/");
+    } catch (error) {
+      dispatch(deleteUserFailure(error));
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await fetch("/api/auth/signout");
+      dispatch(signOut());
+      navigate("/");
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -136,8 +170,12 @@ const Profile = () => {
         </button>
       </form>
       <div className=" flex justify-between mt-5">
-        <span className="text-red-500 cursor-pointer">Delete Account</span>
-        <span className=" text-red-500 cursor-pointer">Sign Out</span>
+        <span className="text-red-500 cursor-pointer" onClick={handleDelete}>
+          Delete Account
+        </span>
+        <span className=" text-red-500 cursor-pointer" onClick={handleSignOut}>
+          Sign Out
+        </span>
       </div>
       <p className=" mt-5 text-red-500">
         {error ? error.message || "Something went wrong" : ""}

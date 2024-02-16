@@ -6,7 +6,7 @@ import {
   signInFailure,
 } from "../redux/user/userSlice";
 import { useDispatch, useSelector } from "react-redux";
-import OAuth from "../components/OAuth.jsx";
+import OAuth from "../components/OAuth";
 
 const Signup = () => {
   const [formData, setFormData] = useState({});
@@ -32,7 +32,8 @@ const Signup = () => {
       const data = await res.json();
       dispatch(signInSuccess(data));
       if (data.success === false) {
-        dispatch(signInFailure());
+        dispatch(signInFailure(data));
+        return;
       }
       navigate("/signin");
     } catch (error) {
@@ -80,7 +81,7 @@ const Signup = () => {
         </Link>
       </div>
       <p className=" mt-5 text-red-500">
-        {error ? error || "Something went wrong" : ""}
+        {error ? error.message || "Something went wrong" : ""}
       </p>
     </div>
   );
